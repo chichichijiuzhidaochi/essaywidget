@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>牛马论文排版机 V2 | 牛马工作室</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+SC:wght@400;700;900&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            cursor: none; /* 隐藏默认光标 */
+        }
+        
+        /* 自定义光标 */
+        #custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            border: 2px dashed #38bdf8;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            animation: spin-cursor 4s linear infinite;
+            mix-blend-mode: difference;
+        }
+        @keyframes spin-cursor { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+        /* 动态背景 */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+        }
+
+        .neon-text {
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 左侧输入框 */
+        .cyber-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: text;
+        }
+        .cyber-input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+            outline: none;
+        }
+
+        /* 右侧输出区：A4纸风格 */
+        .paper-output {
+            background: white;
+            color: black;
+            font-family: "SimSun", "Songti SC", serif; /* 宋体 */
+            line-height: 1.6;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            overflow-y: auto;
+            cursor: text;
+            white-space: pre-wrap;
+        }
+        
+        .paper-output h1 { font-family: "SimHei", sans-serif; font-size: 24px; text-align: center; margin-bottom: 20px; color: black; }
+        .paper-output h2 { font-family: "SimHei", sans-serif; font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: black; font-weight: bold; }
+        .paper-output h3 { font-family: "SimHei", sans-serif; font-size: 16px; margin-top: 15px; margin-bottom: 5px; color: black; font-weight: bold; }
+        .paper-output p { text-indent: 2em; margin-bottom: 10px; text-align: justify; }
+        .paper-output b { font-weight: bold; }
+        
+        .cyber-btn { cursor: none; }
+
+        /* --- 牛马动画系统 --- */
+        #niuma-follower {
+            position: fixed; pointer-events: none; z-index: 9999;
+            will-change: transform, left, top; left: 50%; top: 50%; width: 80px; height: 80px;
+        }
+        .niuma-wrapper { position: relative; width: 100%; height: 100%; transition: transform 0.1s; }
+        
+        /* 动画关键帧 */
+        @keyframes leg-walk { 0% { transform: rotate(-15deg); } 100% { transform: rotate(15deg); } }
+        @keyframes leg-run { 0% { transform: rotate(-40deg); } 100% { transform: rotate(40deg); } }
+        @keyframes body-bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-2px); } }
+        @keyframes body-run-shake { 0% { transform: translateY(0) skewX(0deg); } 25% { transform: translateY(-3px) skewX(-2deg); } 50% { transform: translateY(0) skewX(0deg); } 75% { transform: translateY(-3px) skewX(2deg); } 100% { transform: translateY(0) skewX(0deg); } }
+
+        .leg { transform-box: fill-box; transform-origin: top center; }
+        .state-idle .leg { transform: rotate(0); }
+        .state-walk .leg-front-l, .state-walk .leg-back-r { animation: leg-walk 0.6s infinite ease-in-out alternate; }
+        .state-walk .leg-front-r, .state-walk .leg-back-l { animation: leg-walk 0.6s infinite ease-in-out alternate-reverse; }
+        .state-walk .niuma-body-group { animation: body-bounce 0.6s infinite ease-in-out alternate; }
+        .state-run .leg-front-l, .state-run .leg-back-r { animation: leg-run 0.2s infinite linear alternate; }
+        .state-run .leg-front-r, .state-run .leg-back-l { animation: leg-run 0.2s infinite linear alternate-reverse; }
+        .state-run .niuma-body-group { animation: body-run-shake 0.2s infinite linear; }
+
+        .chat-bubble {
+            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            background: white; color: black; padding: 2px 6px; border-radius: 4px;
+            font-size: 10px; font-weight: bold; opacity: 0; white-space: nowrap; transition: opacity 0.2s;
+        }
+        .chat-bubble::after { content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: white; }
+        .show-bubble { opacity: 1; }
+        .hidden-niuma { opacity: 0; transform: scale(0.5); transition: 0.3s; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+    <div id="custom-cursor"></div>
+    <div class="fixed inset-0 bg-grid pointer-events-none z-0"></div>
+
+    <!-- 牛马跟随者 -->
+    <div id="niuma-follower">
+        <div class="niuma-wrapper" id="niuma-wrapper">
+            <div class="chat-bubble" id="niuma-bubble">格式化!</div>
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-xl">
+                <g class="leg leg-back-l" transform="translate(35, 60)"><rect width="8" height="20" rx="2" fill="#64748b"/><rect y="16" width="8" height="4" fill="#0f172a"/></g>
+                <g class="leg leg-back-r" transform="translate(65, 60)"><rect width="8" height="20" rx="2" fill="#64748b"/><rect y="16" width="8" height="4" fill="#0f172a"/></g>
+                <g class="niuma-body-group">
+                    <rect x="25" y="35" width="50" height="30" rx="4" fill="#cbd5e1"/> 
+                    <rect x="30" y="55" width="40" height="10" fill="#94a3b8" rx="2"/>
+                    <g transform="translate(15, 20)">
+                        <rect x="0" y="0" width="25" height="30" rx="4" fill="#f8fafc"/>
+                        <rect x="0" y="20" width="25" height="10" fill="#f472b6"/>
+                        <rect x="5" y="10" width="4" height="4" fill="#0f172a"/><rect x="16" y="10" width="4" height="4" fill="#0f172a"/>
+                        <path d="M5 0 L8 6 L2 6 Z" fill="#94a3b8"/><path d="M17 0 L20 6 L14 6 Z" fill="#94a3b8"/>
+                        <path d="M-2 8 L0 12 L-4 10 Z" fill="#cbd5e1"/><path d="M27 8 L25 12 L29 10 Z" fill="#cbd5e1"/>
+                    </g>
+                    <rect x="75" y="38" width="4" height="15" rx="2" fill="#94a3b8" transform="rotate(-20 75 38)"/>
+                </g>
+                <g class="leg leg-front-l" transform="translate(35, 60)"><rect width="8" height="20" rx="2" fill="#e2e8f0"/><rect y="16" width="8" height="4" fill="#334155"/></g>
+                <g class="leg leg-front-r" transform="translate(65, 60)"><rect width="8" height="20" rx="2" fill="#e2e8f0"/><rect y="16" width="8" height="4" fill="#334155"/></g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="relative z-10 border-b border-gray-800 bg-gray-900/50 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden p-1">
+                    <svg viewBox="0 0 100 100" fill="none" class="w-full h-full">
+                        <rect x="35" y="60" width="8" height="20" fill="#64748b"/><rect x="65" y="60" width="8" height="20" fill="#64748b"/>
+                        <rect x="25" y="35" width="50" height="30" rx="4" fill="#cbd5e1"/><rect x="15" y="20" width="25" height="30" rx="4" fill="#f8fafc"/>
+                        <rect x="15" y="40" width="25" height="10" fill="#f472b6"/>
+                        <rect x="20" y="30" width="4" height="4" fill="#0f172a"/><rect x="31" y="30" width="4" height="4" fill="#0f172a"/>
+                        <path d="M20 20 L23 26 L17 26 Z" fill="#94a3b8"/><path d="M32 20 L35 26 L29 26 Z" fill="#94a3b8"/>
+                        <rect x="35" y="60" width="8" height="20" fill="#e2e8f0"/><rect x="65" y="60" width="8" height="20" fill="#e2e8f0"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight neon-text italic">
+                        牛马论文排版机 <span class="text-sm font-normal text-gray-400 not-italic">V2.0</span>
+                    </h1>
+                    <p class="text-xs text-blue-400 font-mono tracking-widest uppercase">Format & Clean AI Text</p>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center space-x-2 bg-gray-800/50 rounded-full px-3 py-1 border border-gray-700">
+                <span class="text-xs text-yellow-400 font-mono">● MODE: WORD_READY</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow relative z-10 max-w-7xl mx-auto w-full px-6 py-10 flex flex-col lg:flex-row gap-8">
+        
+        <!-- Input -->
+        <div class="flex-1 flex flex-col group min-w-0">
+            <div class="flex justify-between items-end mb-2 px-1">
+                <h2 class="text-blue-400 font-bold flex items-center gap-2 font-mono text-sm">[ AI_RAW_TEXT ]</h2>
+                <button onclick="clearInput()" class="text-xs text-gray-500 hover:text-red-400 transition-colors font-mono hover:underline cursor-pointer">/clear</button>
+            </div>
+            <textarea id="inputText" class="cyber-input flex-1 w-full rounded-xl p-5 text-gray-300 resize-none min-h-[500px] leading-relaxed" placeholder="请粘贴 AI 生成的文本...&#10;1. 自动转换 $$1$$ 为 [1]&#10;2. 自动去除所有双引号 “ ”&#10;3. 自动识别标题并排版" spellcheck="false"></textarea>
+        </div>
+
+        <!-- Button -->
+        <div class="flex lg:flex-col items-center justify-center gap-4 shrink-0">
+            <button onclick="processToPaper()" class="cyber-btn bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl p-4 shadow-lg shadow-blue-900/50 transform hover:scale-110 active:scale-95 transition-all group border border-blue-400/30 z-20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 lg:rotate-0 rotate-90 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </button>
+            <div class="text-[10px] text-gray-500 text-center font-mono w-20">Format</div>
+        </div>
+
+        <!-- Output -->
+        <div class="flex-1 flex flex-col group min-w-0">
+             <div class="flex justify-between items-end mb-2 px-1">
+                <h2 class="text-white font-bold flex items-center gap-2 font-mono text-sm">
+                    <span class="bg-white text-black px-1 rounded-sm text-xs mr-1">DOCX</span>
+                    [ PREVIEW_A4 ]
+                </h2>
+                <span id="statusMsg" class="text-xs text-green-400 font-mono opacity-0 transition-opacity duration-300">>> READY_TO_PASTE <<</span>
+            </div>
+            
+            <div class="relative flex-1 flex flex-col bg-gray-800 rounded-xl p-1 overflow-hidden">
+                <div id="outputPaper" contenteditable="true" class="paper-output flex-1 w-full rounded-lg min-h-[500px] outline-none" data-placeholder="格式化后的论文将显示在这里...">
+                </div>
+                
+                <div class="absolute bottom-6 right-6 flex gap-2">
+                    <button onclick="copyPaper()" class="bg-black/80 hover:bg-black text-white border border-gray-600 px-4 py-2 rounded-lg backdrop-blur-md flex items-center gap-2 text-sm font-bold transition-all shadow-lg hover:shadow-xl z-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                        复制 Word 格式
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="relative z-10 py-6 text-center text-gray-600 text-xs font-mono border-t border-gray-800 bg-gray-900">
+        <p>功能: $$1$$➔[1] | 去除双引号 | Word样式重排</p>
+    </footer>
+
+    <script>
+        // --- 排版逻辑 ---
+        const inputText = document.getElementById('inputText');
+        const outputPaper = document.getElementById('outputPaper');
+        const statusMsg = document.getElementById('statusMsg');
+
+        function processToPaper() {
+            const raw = inputText.value;
+            if (!raw.trim()) return;
+
+            const lines = raw.split('\n');
+            let htmlOutput = '';
+            
+            lines.forEach(line => {
+                let text = line.trim();
+                if (!text) return; 
+
+                // 识别 Markdown 标题
+                if (text.startsWith('# ')) {
+                    text = text.replace(/^#\s+/, '');
+                    htmlOutput += `<h1>${cleanInline(text)}</h1>`;
+                } else if (text.startsWith('## ')) {
+                    text = text.replace(/^##\s+/, '');
+                    htmlOutput += `<h2>${cleanInline(text)}</h2>`;
+                } else if (text.startsWith('### ')) {
+                    text = text.replace(/^###\s+/, '');
+                    htmlOutput += `<h3>${cleanInline(text)}</h3>`;
+                } else {
+                    // 清洗列表符号 (- 或 • 或 *)
+                    text = text.replace(/^[\-\*•]\s+/, '');
+                    text = text.replace(/^>\s+/, '');
+                    htmlOutput += `<p>${cleanInline(text)}</p>`;
+                }
+            });
+
+            outputPaper.innerHTML = htmlOutput;
+        }
+
+        // 清洗行内元素的核心函数
+        function cleanInline(str) {
+            let res = str;
+            
+            // 1. 【新增】转换 $$数字$$ 为 [数字]
+            // 例如：$$1$$ -> [1], $$12$$ -> [12]
+            res = res.replace(/\$\$(\d+)\$\$/g, '[$1]');
+
+            // 2. 【新增】去除所有双引号 (英文" 和 中文“”)
+            res = res.replace(/[“”"]/g, '');
+
+            // 3. 转换加粗 (**text**) -> <b>text</b>
+            res = res.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+            // 注意：此处不再包含删除 [1] 的逻辑，原有的 [1] 会被保留
+
+            return res;
+        }
+
+        function clearInput() { inputText.value = ''; outputPaper.innerHTML = ''; inputText.focus(); }
+        
+        function copyPaper() {
+            if (!outputPaper.innerText.trim()) return;
+            const range = document.createRange();
+            range.selectNodeContents(outputPaper);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand('copy');
+            statusMsg.classList.remove('opacity-0');
+            statusMsg.innerText = ">> 已复制 Word 格式! <<";
+            setTimeout(() => statusMsg.classList.add('opacity-0'), 2000);
+        }
+
+        // --- 鼠标 & 动画 ---
+        const cursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        const follower = document.getElementById('niuma-follower');
+        const wrapper = document.getElementById('niuma-wrapper');
+        const bubble = document.getElementById('niuma-bubble');
+        let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+        let pX = mouseX, pY = mouseY;
+        let isOverInput = false;
+
+        document.addEventListener('mousemove', e => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            const t = e.target;
+            isOverInput = (t.tagName === 'TEXTAREA' || t.getAttribute('contenteditable') === 'true');
+        });
+
+        const texts = {
+            idle: ["Zzz...", "摸鱼", "整理中", "排版..."],
+            walk: ["溜达~", "转换引用", "去引号", "格式化"],
+            run: ["嗷嗷跑!", "Word!", "Paper!", "加班!"]
+        };
+
+        let currentMode = 'idle';
+        let bubbleTimer = null;
+
+        function setBubble(text) {
+            bubble.innerText = text;
+            bubble.classList.add('show-bubble');
+            if(bubbleTimer) clearTimeout(bubbleTimer);
+            bubbleTimer = setTimeout(() => bubble.classList.remove('show-bubble'), 1500);
+        }
+
+        function animate() {
+            const dx = mouseX - pX; const dy = mouseY - pY; const dist = Math.sqrt(dx*dx + dy*dy);
+            let speed = 0.05; let newMode = 'idle';
+            if (dist > 300) { newMode = 'run'; speed = 0.12; }
+            else if (dist > 20) { newMode = 'walk'; speed = 0.06; }
+            else { newMode = 'idle'; }
+
+            pX += dx * speed; pY += dy * speed;
+            follower.style.left = (pX - 40) + 'px'; follower.style.top = (pY - 40) + 'px';
+
+            if (newMode !== currentMode) {
+                wrapper.classList.remove('state-idle', 'state-walk', 'state-run');
+                wrapper.classList.add('state-' + newMode);
+                if ((newMode === 'run' && currentMode !== 'run') || (newMode === 'walk' && currentMode === 'idle')) {
+                    const list = texts[newMode];
+                    if (Math.random() > 0.6) setBubble(list[Math.floor(Math.random() * list.length)]);
+                }
+                currentMode = newMode;
+            }
+
+            if (Math.abs(dx) > 2) {
+                if (dx > 0) wrapper.style.transform = "scaleX(-1)";
+                else wrapper.style.transform = "scaleX(1)";
+            }
+
+            if (isOverInput) follower.classList.add('hidden-niuma');
+            else follower.classList.remove('hidden-niuma');
+            requestAnimationFrame(animate);
+        }
+        wrapper.classList.add('state-idle');
+        animate();
+    </script>
+</body>
+</html>
