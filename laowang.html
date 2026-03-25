@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>职业教育招生“奇袭”全案 - 终极交互百科版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
+        
+        :root {
+            --primary: #1e40af;
+            --accent: #f97316;
+            --bg: #0f172a;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: var(--bg);
+            color: #f8fafc;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .slide-container {
+            height: 100vh;
+            width: 100vw;
+            transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            flex-shrink: 0;
+            padding: 1.5rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 引导交互动效 */
+        @keyframes pulse-orange {
+            0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(249, 115, 22, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+        }
+        .click-hint {
+            animation: pulse-orange 2s infinite;
+            border: 2px solid var(--accent);
+        }
+
+        /* 3D 翻转卡片 */
+        .card-3d-wrap { perspective: 1000px; }
+        .card-3d-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        .card-3d-inner.is-flipped { transform: rotateY(180deg); }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            width: 100%;
+            height: 100%;
+            border-radius: 1.5rem;
+        }
+        .card-back { transform: rotateY(180deg); position: absolute; top: 0; left: 0; }
+
+        /* 手机模拟器 */
+        .phone-frame {
+            border: 12px solid #334155;
+            border-radius: 2.5rem;
+            aspect-ratio: 9/19;
+            width: 300px;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-indicator {
+            height: 4px;
+            background: var(--accent);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .slide::-webkit-scrollbar { display: none; }
+        .slide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @media (max-width: 768px) {
+            .slide { padding: 1rem; }
+            h1 { font-size: 2.5rem !important; }
+            .card-grid { grid-template-columns: 1fr !important; }
+            .phone-frame { width: 240px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="progress" class="progress-indicator" style="width: 10%"></div>
+
+    <div id="main-container" class="slide-container flex">
+        
+        <!-- Slide 01: 封面 -->
+        <div class="slide flex flex-col items-center justify-center text-center bg-gradient-to-br from-blue-900 via-slate-900 to-black">
+            <div class="absolute w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] -top-20 -left-20 animate-pulse"></div>
+            <div class="relative z-10">
+                <div class="mb-6 flex justify-center space-x-2">
+                    <span class="px-3 py-1 bg-orange-500 text-white font-bold rounded text-[10px] tracking-widest">2026 EDITION</span>
+                    <span class="px-3 py-1 bg-blue-600 text-white font-bold rounded text-[10px] tracking-widest">INTERACTIVE MANUAL</span>
+                </div>
+                <h1 class="text-6xl md:text-8xl font-black mb-6 leading-tight tracking-tighter">成就未来<br><span class="text-orange-500 italic">从“新”开始</span></h1>
+                <p class="text-xl md:text-2xl text-blue-200 font-light mb-12 opacity-80 max-w-2xl mx-auto">针对个人的最小成本、极度可执行招生百科。摒弃说教，只给指令。</p>
+                <div class="flex items-center justify-center space-x-3 text-orange-500 font-bold click-hint py-3 px-8 rounded-full cursor-pointer hover:bg-orange-500/10 transition" onclick="nextSlide()">
+                    <span>点击或右划开启实战</span>
+                    <i data-lucide="play-circle" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 02: 本质诉求 (3D 卡片) -->
+        <div class="slide py-12 bg-slate-900">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-between mb-10">
+                    <h2 class="text-3xl font-bold border-l-4 border-orange-500 pl-4">P2: 第一性原理——本质诉求</h2>
+                    <div class="flex items-center text-xs text-orange-400 animate-bounce">
+                        <i data-lucide="mouse-pointer-2" class="mr-2"></i> 点击下方卡片翻转
+                    </div>
+                </div>
+                <div class="card-grid grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- 卡片 1: 安全感 -->
+                    <div class="card-3d-wrap h-96 group" onclick="toggleFlip(this)">
+                        <div class="card-3d-inner w-full h-full cursor-pointer click-hint">
+                            <div class="card-front bg-slate-800 p-8 flex flex-col justify-center border border-white/5">
+                                <i data-lucide="shield-check" class="text-orange-500 w-14 h-14 mb-6"></i>
+                                <h3 class="text-2xl font-bold mb-3">安全感: 绝不混社会</h3>
+                                <p class="text-sm opacity-60 leading-relaxed">家长心声：我怕孩子学坏，怕他在外面跟着流氓混。学校能不能管住他？</p>
+                                <div class="mt-6 text-orange-500 text-xs font-bold flex items-center">点击揭示话术 <i data-lucide="refresh-cw" class="ml-2 w-3 h-3"></i></div>
+                            </div>
+                            <div class="card-back bg-orange-600 p-8 flex flex-col justify-center shadow-2xl">
+                                <h4 class="font-bold text-xl mb-4 italic">核心话术建议：</h4>
+                                <div class="space-y-4 text-sm leading-relaxed text-white/90">
+                                    <p>“姐，咱不谈虚的。学校人脸识别门禁，老师24小时跟班，晚上熄灯查寝。孩子除了学技术，坏毛病一点沾不上。咱们要的是把孩子这三年的性格定型，学个正派样儿。”</p>
+                                    <p class="pt-4 border-t border-white/20 text-xs italic">💡 绝招：随手发一段昨晚查寝的监控小短片给家长，信任感瞬间爆棚。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 卡片 2: 尊严感 -->
+                    <div class="card-3d-wrap h-96" onclick="toggleFlip(this)">
+                        <div class="card-3d-inner w-full h-full cursor-pointer click-hint">
+                            <div class="card-front bg-slate-800 p-8 flex flex-col justify-center border border-white/5">
+                                <i data-lucide="award" class="text-blue-500 w-14 h-14 mb-6"></i>
+                                <h3 class="text-2xl font-bold mb-3">尊严感: 有面子的出路</h3>
+                                <p class="text-sm opacity-60 leading-relaxed">家长心声：亲戚问起来，难道说孩子读技校？没面子。以后能不能拿证？</p>
+                                <div class="mt-6 text-blue-500 text-xs font-bold flex items-center">点击揭示逻辑 <i data-lucide="refresh-cw" class="ml-2 w-3 h-3"></i></div>
+                            </div>
+                            <div class="card-back bg-blue-600 p-8 flex flex-col justify-center shadow-2xl">
+                                <h4 class="font-bold text-xl mb-4 italic">核心话术建议：</h4>
+                                <div class="space-y-4 text-sm leading-relaxed text-white/90">
+                                    <p>“现在国家搞职普分流，一半人去职高。咱这叫‘技能型高考’，拿国家承认的中专证，三年后对口升大专。亲戚问起来，你就说孩子选了热门的技术赛道，以后是工程师培养对象。”</p>
+                                    <p class="pt-4 border-t border-white/20 text-xs italic">💡 绝招：给家长看全日制中专毕业证样板，解释如何直升本科。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 卡片 3: 确定性 -->
+                    <div class="card-3d-wrap h-96" onclick="toggleFlip(this)">
+                        <div class="card-3d-inner w-full h-full cursor-pointer click-hint">
+                            <div class="card-front bg-slate-800 p-8 flex flex-col justify-center border border-white/5">
+                                <i data-lucide="trending-up" class="text-green-500 w-14 h-14 mb-6"></i>
+                                <h3 class="text-2xl font-bold mb-3">确定性: 直接发饭碗</h3>
+                                <p class="text-sm opacity-60 leading-relaxed">家长心声：毕业后能干啥？真能分工作吗？工资多少？是不是去拧螺丝？</p>
+                                <div class="mt-6 text-green-500 text-xs font-bold flex items-center">点击揭示证据 <i data-lucide="refresh-cw" class="ml-2 w-3 h-3"></i></div>
+                            </div>
+                            <div class="card-back bg-green-600 p-8 flex flex-col justify-center shadow-2xl">
+                                <h4 class="font-bold text-xl mb-4 italic">核心案例证据：</h4>
+                                <div class="space-y-4 text-sm leading-relaxed text-white/90">
+                                    <p>“您看去年毕业的小王，入职比亚迪，底薪6k包吃住。咱们入职签保障协议。您教孩子三年书可能还是迷茫，但在咱们这，三年后他就是一个能养活自己、甚至贴补家里的男子汉。”</p>
+                                    <p class="pt-4 border-t border-white/20 text-xs italic">💡 绝招：准备一个“往届生工资条”影集（打码处理）。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 03: 个人优势 (深度解释) -->
+        <div class="slide py-12 bg-slate-900">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold border-l-4 border-orange-500 pl-4 mb-12">P3: 个人优势——如何用信任“收割”生源</h2>
+                <div class="grid grid-cols-1 gap-8">
+                    <div class="relative bg-slate-800 p-10 rounded-[2.5rem] border border-white/5 overflow-hidden click-hint group cursor-default">
+                        <div class="absolute -right-10 -top-10 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-all duration-500"></div>
+                        <h3 class="text-2xl font-bold mb-6 text-orange-400">为什么“个人”反而更强？</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-blue-600/20 p-3 rounded-xl"><i data-lucide="heart" class="text-blue-400"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">极致的共情服务</h4>
+                                    <p class="text-sm opacity-60 leading-relaxed">大机构老师是打卡下班。你作为招生合伙人，凌晨1点给家长分析孩子的性格优劣，这种“被重视感”是家长决策的最后一块拼图。<b>你要做家长的“升学规划师”，而非“销售员”。</b></p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-orange-600/20 p-3 rounded-xl"><i data-lucide="landmark" class="text-orange-400"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-lg mb-1">熟人社会的信誉背书</h4>
+                                    <p class="text-sm opacity-60 leading-relaxed">在县城和乡镇，家长相信“熟人”。你的朋友圈展示的是你真实的生活、你对职业教育的思考。你用你的信誉在给学校做担保。家长会想：<b>“既然XX老师敢这么推，那肯定没错。”</b></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-blue-900/20 p-6 rounded-2xl border border-blue-500/30 text-center italic text-blue-200">
+                        “信任是招生中唯一的货币，个人IP是创造这种货币最快的印刷机。”
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 04: 渠道 A (地图插旗) -->
+        <div class="slide py-12 bg-slate-900">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-bold border-l-4 border-orange-500 pl-4">P4: 奇袭渠道 A——社区“插旗”爆破</h2>
+                    <span class="text-orange-500 text-xs flex items-center click-hint px-3 py-1 rounded-full"><i data-lucide="touchpad" class="mr-2"></i> 交互：点击地图标点</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                    <div class="space-y-4">
+                        <div class="p-5 bg-slate-800 rounded-2xl cursor-pointer hover:bg-slate-700 transition border-l-4 border-orange-500 click-hint" onclick="showTip('tip1')">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-lg">📍 快递驿站：挪车贴策略</h4>
+                                <i data-lucide="arrow-right-circle" class="text-orange-500"></i>
+                            </div>
+                            <p class="text-xs opacity-50 mt-1 italic italic">解决问题：家长去哪儿了？</p>
+                        </div>
+                        <div class="p-5 bg-slate-800 rounded-2xl cursor-pointer hover:bg-slate-700 transition border-l-4 border-blue-500 click-hint" onclick="showTip('tip2')">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-lg">📍 诊所/药店：焦虑缓解点</h4>
+                                <i data-lucide="arrow-right-circle" class="text-blue-500"></i>
+                            </div>
+                            <p class="text-xs opacity-50 mt-1 italic">解决问题：信任从哪儿来？</p>
+                        </div>
+                        <div class="p-5 bg-slate-800 rounded-2xl cursor-pointer hover:bg-slate-700 transition border-l-4 border-green-500 click-hint" onclick="showTip('tip3')">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-bold text-lg">📍 学校周边小超市：拆包器</h4>
+                                <i data-lucide="arrow-right-circle" class="text-green-500"></i>
+                            </div>
+                            <p class="text-xs opacity-50 mt-1 italic">解决问题：如何留下长久广告？</p>
+                        </div>
+                        <div id="tip-content" class="p-6 bg-slate-950 rounded-2xl min-h-[160px] flex flex-col justify-center text-sm leading-relaxed border border-white/10 shadow-inner">
+                            <p class="opacity-40 italic text-center">点击上方渠道，查看“白嫖流量”的极致细节</p>
+                        </div>
+                    </div>
+                    <div class="hidden md:flex justify-center relative">
+                        <div class="absolute inset-0 bg-blue-500/5 blur-3xl animate-pulse"></div>
+                        <i data-lucide="map" class="text-blue-900 w-64 h-64 opacity-20"></i>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                             <div class="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center click-hint">
+                                <i data-lucide="navigation" class="text-white w-10 h-10 animate-bounce"></i>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 05: 渠道 B (行业意见领袖) -->
+        <div class="slide py-12 bg-slate-900">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center justify-between mb-10">
+                    <h2 class="text-3xl font-bold border-l-4 border-orange-500 pl-4">P5: 奇袭渠道 B——借力行业意见领袖</h2>
+                    <span class="text-blue-400 text-xs animate-pulse">左右滑动查看更多行业合作模式</span>
+                </div>
+                <div class="flex overflow-x-auto space-x-6 pb-12 snap-x hide-scrollbar">
+                    <!-- 汽修铺 -->
+                    <div class="snap-center shrink-0 w-80 bg-slate-800 p-8 rounded-3xl border border-white/5 shadow-2xl click-hint">
+                        <div class="w-14 h-14 bg-orange-500/20 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="wrench" class="text-orange-500 w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">县城汽修铺/摩托行</h3>
+                        <p class="text-sm opacity-70 leading-relaxed mb-6"><b>合作点：</b>老板常遇到“想送孩子来学徒”的家长。谈合作：学徒没证，毕业没路。送来咱们学校，毕业老板还能优先选拔当高级技师。</p>
+                        <div class="bg-slate-900 p-4 rounded-xl text-xs text-orange-400 leading-relaxed">
+                            <b>话术：</b>“老板，帮邻居拉一把，让孩子拿个学历。成一个，提成您拿1500，咱这叫共赢。”
+                        </div>
+                    </div>
+                    <!-- 理发店 -->
+                    <div class="snap-center shrink-0 w-80 bg-slate-800 p-8 rounded-3xl border border-white/5 shadow-2xl click-hint">
+                        <div class="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="scissors" class="text-purple-400 w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">社区理发店/美容院</h3>
+                        <p class="text-sm opacity-70 leading-relaxed mb-6"><b>合作点：</b>洗头、染发的40分钟是天然的封闭式宣教窗口。大姐在家长耳边说一句“XX老师推荐的学校真的挺好”，信任度极高。</p>
+                        <div class="bg-slate-900 p-4 rounded-xl text-xs text-purple-400 leading-relaxed">
+                            <b>战术：</b>在镜子下方贴个不显眼的择校二维码。老板推一个加微信，先发个20块钱辛苦红包。
+                        </div>
+                    </div>
+                    <!-- 物管保安 -->
+                    <div class="snap-center shrink-0 w-80 bg-slate-800 p-8 rounded-3xl border border-white/5 shadow-2xl click-hint">
+                        <div class="w-14 h-14 bg-green-500/20 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="home" class="text-green-400 w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">社区保安/物业主管</h3>
+                        <p class="text-sm opacity-70 leading-relaxed mb-6"><b>合作点：</b>他们掌握全小区哪个孩子中考。甚至知道谁家孩子现在天天在小区晃悠（考不上高中的）。</p>
+                        <div class="bg-slate-900 p-4 rounded-xl text-xs text-green-400 leading-relaxed">
+                            <b>方案：</b>送一批印有学校二维码的纸巾包给保安。有人进门聊天顺手发一包，广告成本极低。
+                        </div>
+                    </div>
+                    <!-- 外卖小哥 -->
+                    <div class="snap-center shrink-0 w-80 bg-slate-800 p-8 rounded-3xl border border-white/5 shadow-2xl click-hint">
+                        <div class="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="bike" class="text-blue-400 w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">外卖小哥驿站</h3>
+                        <p class="text-sm opacity-70 leading-relaxed mb-6"><b>合作点：</b>外卖小哥常去初中送外卖。给外卖箱贴上你的“中职避雷”二维码贴纸，全城移动广告。</p>
+                        <div class="bg-slate-900 p-4 rounded-xl text-xs text-blue-400 leading-relaxed">
+                            <b>战术：</b>每扫码一个有效电话给小哥10元。简单粗暴。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 06: 媒体 IP (手机仿真) -->
+        <div class="slide py-12 bg-slate-900 flex flex-col items-center">
+            <h2 class="text-3xl font-bold border-l-4 border-orange-500 pl-4 mb-10 w-full max-w-6xl">P6: 媒体 IP 风格——“第一现场”即正义</h2>
+            <div class="flex flex-col md:flex-row items-center gap-12 max-w-6xl w-full">
+                <div class="phone-frame click-hint">
+                    <div class="h-full w-full bg-cover bg-center flex flex-col justify-end p-6" style="background-image: url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=400')">
+                         <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+                         <div class="relative z-10 space-y-3">
+                             <div class="flex items-center space-x-2">
+                                 <div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white"></div>
+                                 <p class="text-xs font-bold text-white shadow-sm">@招生办老李</p>
+                             </div>
+                             <p class="text-[10px] text-white/90 font-medium">今天不聊政策，带大家实地看看孩子们的晚餐... #中职生活 #真实记录</p>
+                             <div class="flex space-x-2">
+                                 <span class="px-2 py-0.5 bg-white/20 rounded text-[8px]">#真实感</span>
+                                 <span class="px-2 py-0.5 bg-white/20 rounded text-[8px]">#无滤镜</span>
+                             </div>
+                         </div>
+                    </div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                         <i data-lucide="play" class="text-white/80 w-16 h-16 opacity-30 animate-pulse"></i>
+                    </div>
+                </div>
+                <div class="flex-1 space-y-6">
+                    <div class="p-6 bg-slate-800 rounded-3xl border border-white/5 relative">
+                        <div class="absolute -left-3 top-6 w-0 h-0 border-t-[10px] border-t-transparent border-r-[12px] border-r-slate-800 border-b-[10px] border-b-transparent"></div>
+                        <h4 class="text-orange-400 font-bold mb-4 flex items-center"><i data-lucide="message-square" class="mr-2"></i> 拍摄核心逻辑</h4>
+                        <ul class="text-sm space-y-4 opacity-80 leading-relaxed">
+                            <li><b>不要高大上：</b>背景哪怕乱一点，但必须是实训室、宿舍、食堂。西装是大忌，白衬衫或工装是标配。</li>
+                            <li><b>不要背台词：</b>用方言或接地气的口语。直接对着镜头说：“大家看，这排骨新鲜不？孩子吃得好，家长才放心。”</li>
+                            <li><b>解决“不对等”：</b>家长看那些精修图看腻了，他们想看手机里真实的画面。<b>“第一现场”=“我不骗你”。</b></li>
+                        </ul>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-blue-600/10 rounded-2xl border border-blue-500/20 text-center">
+                            <p class="text-xl font-black text-blue-400">01</p>
+                            <p class="text-[10px] opacity-60">实操即权威</p>
+                        </div>
+                        <div class="p-4 bg-orange-600/10 rounded-2xl border border-orange-500/20 text-center">
+                            <p class="text-xl font-black text-orange-400">02</p>
+                            <p class="text-[10px] opacity-60">宿舍见管理</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 07: 社交媒体 (Tab 内容) -->
+        <div class="slide py-12 bg-slate-900">
+            <div class="max-w-7xl mx-auto h-full flex flex-col">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-bold border-l-4 border-orange-500 pl-4">P7: 社交媒体——“一键复制”素材库</h2>
+                    <div class="text-xs text-orange-500 animate-bounce flex items-center">
+                        <i data-lucide="mouse-pointer-click" class="mr-1"></i> 切换标签查看
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2 mb-8 p-1.5 bg-slate-800 rounded-2xl w-fit self-center md:self-start click-hint">
+                    <button onclick="switchTab('dy')" class="tab-btn px-8 py-3 rounded-xl font-bold transition bg-blue-600 text-white" id="btn-dy">抖音脚本 (10套)</button>
+                    <button onclick="switchTab('xhs')" class="tab-btn px-8 py-3 rounded-xl font-bold transition opacity-50" id="btn-xhs">小红书模板 (8套)</button>
+                </div>
+
+                <div id="tab-content" class="flex-grow overflow-y-auto pr-2 grid grid-cols-1 md:grid-cols-2 gap-6 scroll-smooth">
+                    <!-- 动态注入丰富内容 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 08: 私域运营 -->
+        <div class="slide py-12 bg-slate-900">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl font-bold border-l-4 border-orange-500 pl-4 mb-12">P8: 私域闭环——如何把流量“变现”成报名</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="p-10 bg-gradient-to-br from-blue-900/50 to-slate-800 rounded-[3rem] border border-blue-500/20 flex flex-col items-center text-center shadow-2xl relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <i data-lucide="smartphone" class="w-20 h-20 text-blue-400 mb-8 animate-pulse"></i>
+                        <h3 class="text-2xl font-black mb-4 tracking-tighter">极简招生官网</h3>
+                        <p class="text-sm opacity-60 leading-relaxed mb-8">
+                            <b>执行标准：</b>拒绝任何复杂逻辑。全站只需要三个大块：<br>
+                            1. 宿舍视频(向往感) <br>
+                            2. 毕业生就业协议(安全感) <br>
+                            3. <b>【预约校园参观】</b>悬浮按钮(转化点)。<br>
+                            <span class="text-orange-500 italic">“找个大学生花500块就能搞定，官网是用来拿电话的，不是用来展示艺术的。”</span>
+                        </p>
+                        <button class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 transition">预览官网模板</button>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="p-6 bg-slate-800 rounded-3xl border border-white/5 hover:border-orange-500/50 transition cursor-default group">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <i data-lucide="send" class="text-orange-500 w-4 h-4"></i>
+                                <span class="text-orange-500 font-bold">朋友圈模板: 结果导向</span>
+                            </div>
+                            <p class="text-xs opacity-50 leading-relaxed"><b>文案：</b>“恭喜汽修二班的张同学，今天正式入职比亚迪。三年前你或许在考场迷茫，但今天，你是社会的香饽饽。技能在手，天下我有。”</p>
+                        </div>
+                        <div class="p-6 bg-slate-800 rounded-3xl border border-white/5 hover:border-blue-500/50 transition cursor-default">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <i data-lucide="coffee" class="text-blue-500 w-4 h-4"></i>
+                                <span class="text-blue-500 font-bold">朋友圈模板: 情感共鸣</span>
+                            </div>
+                            <p class="text-xs opacity-50 leading-relaxed"><b>文案：</b>“刚回完第50个家长的微信。大家问得最多的就是‘孩子能学会吗？’我想说，没有教不好的孩子，只有没选对赛道的老师。与其在题海里痛苦，不如在实操台找回自信。”</p>
+                        </div>
+                        <div class="p-6 bg-slate-800 rounded-3xl border border-white/5 hover:border-green-500/50 transition cursor-default">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <i data-lucide="eye" class="text-green-500 w-4 h-4"></i>
+                                <span class="text-green-500 font-bold">朋友圈模板: 真实管理</span>
+                            </div>
+                            <p class="text-xs opacity-50 leading-relaxed"><b>文案：</b>（配短视频：宿管查寝）“晚上10点，一切有序。孩子们的床铺整齐。在这里，管理不仅是制度，更是对每个家庭的承诺。家长们，睡个安稳觉。”</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 09: 落地手册 (垂直时间轴) -->
+        <div class="slide py-12 bg-slate-900">
+            <div class="max-w-4xl mx-auto px-4">
+                <h2 class="text-3xl font-bold border-l-4 border-orange-500 pl-4 mb-12">P9: 个人招生“白嫖”落地手册</h2>
+                <div class="relative border-l-2 border-white/10 ml-6 space-y-16 py-4">
+                    <!-- Day 1-3 -->
+                    <div class="relative pl-10 group cursor-default">
+                        <div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.6)] click-hint"></div>
+                        <h4 class="font-bold text-xl mb-3 text-orange-400">D1 - D3: 极速基建期</h4>
+                        <div class="text-sm opacity-70 space-y-2 bg-slate-800 p-6 rounded-2xl border border-white/5">
+                            <p>• <b>素材拍摄：</b>不要等，拿起手机去学校，把宿舍、食堂、实训室拍成100个短素材片段。</p>
+                            <p>• <b>官网搭建：</b>找人套模板上线。确保电话号码、预约按钮处于手机首屏可见位置。</p>
+                            <p>• <b>账号对标：</b>注册抖音/小红书，头像统一，简介写：“专注初三择校规划XX老师”。</p>
+                        </div>
+                    </div>
+                    <!-- Day 4-7 -->
+                    <div class="relative pl-10 group cursor-default">
+                        <div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.6)] click-hint"></div>
+                        <h4 class="font-bold text-xl mb-3 text-blue-400">D4 - D7: 奇袭渗透期</h4>
+                        <div class="text-sm opacity-70 space-y-2 bg-slate-800 p-6 rounded-2xl border border-white/5">
+                            <p>• <b>线下插旗：</b>走访3个驿站送挪车贴。拜访2个学校周边小超市送拆包器。搞定老板微信。</p>
+                            <p>• <b>异业分成：</b>找两个理发店或手机维修铺，谈好“意向分成”，留下你的招生卡片。</p>
+                            <p>• <b>内容连发：</b>抖音每天发2条“耿直老师”视频，评论区每个家长必须回。</p>
+                        </div>
+                    </div>
+                    <!-- Day 8-10 -->
+                    <div class="relative pl-10 group cursor-default">
+                        <div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.6)] click-hint"></div>
+                        <h4 class="font-bold text-xl mb-3 text-green-400">D8 - D10: 闭环转化期</h4>
+                        <div class="text-sm opacity-70 space-y-2 bg-slate-800 p-6 rounded-2xl border border-white/5">
+                            <p>• <b>电话回访：</b>回访官网上留存的所有家长电话，邀请他们周末来校实地参观。</p>
+                            <p>• <b>云探校：</b>开启一场简单的直播，直接带手机去走廊、去宿舍转悠，解答实时提问。</p>
+                            <p>• <b>私域成交：</b>在朋友圈发出一份“最后30个名额，前10名送校服”的限时钩子。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Ending -->
+        <div class="slide flex flex-col items-center justify-center text-center bg-black">
+            <div class="absolute inset-0 bg-blue-500/5 blur-[100px] animate-pulse"></div>
+            <h2 class="text-6xl md:text-8xl font-black mb-12 italic tracking-tighter leading-none">先做个人ip<br><span class="text-orange-500">再做生源</span></h2>
+            <div class="w-48 h-1 bg-white/20 mb-12"></div>
+            <button onclick="goToSlide(0)" class="px-12 py-5 bg-orange-500 text-white font-black rounded-full shadow-2xl hover:bg-orange-600 active:scale-95 transition text-lg tracking-widest click-hint">
+                重新复盘策略
+            </button>
+            <p class="mt-8 opacity-30 text-xs tracking-widest">NO EXECUTION, NO ENROLLMENT.</p>
+        </div>
+
+    </div>
+
+    <!-- 导航控制 -->
+    <div class="fixed bottom-8 right-8 flex space-x-4 z-50">
+        <button onclick="prevSlide()" class="nav-btn p-5 rounded-full text-white/50 hover:text-white transition shadow-2xl">
+            <i data-lucide="chevron-left"></i>
+        </button>
+        <button onclick="nextSlide()" class="nav-btn p-5 bg-orange-500 text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition click-hint">
+            <i data-lucide="chevron-right"></i>
+        </button>
+    </div>
+
+    <script>
+        window.onload = function() {
+            lucide.createIcons();
+            switchTab('dy');
+        };
+
+        let currentSlide = 0;
+        const container = document.getElementById('main-container');
+        const totalSlides = 10;
+        const progress = document.getElementById('progress');
+
+        // 滑动逻辑
+        let startX = 0;
+        document.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+        document.addEventListener('touchend', e => {
+            const endX = e.changedTouches[0].clientX;
+            const diff = startX - endX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) nextSlide();
+                else prevSlide();
+            }
+        });
+
+        function updateSlide() {
+            container.style.transform = `translateX(-${currentSlide * 100}vw)`;
+            progress.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            lucide.createIcons();
+        }
+
+        function nextSlide() { if (currentSlide < totalSlides - 1) { currentSlide++; updateSlide(); } }
+        function prevSlide() { if (currentSlide > 0) { currentSlide--; updateSlide(); } }
+        function goToSlide(n) { currentSlide = n; updateSlide(); }
+
+        function toggleFlip(el) {
+            el.querySelector('.card-3d-inner').classList.toggle('is-flipped');
+        }
+
+        function showTip(type) {
+            const content = document.getElementById('tip-content');
+            content.style.opacity = '0';
+            setTimeout(() => {
+                if(type === 'tip1') {
+                    content.innerHTML = `<h4 class='text-orange-500 font-bold mb-2'>驿站挪车贴细节：</h4><p>印制1000份带二维码的挪车贴，送给驿站。<b>原理：</b>家长取快递时常有挪车刚需，且驿站老板推销邻里信任度100%。只要扫码加微信，送精美拆包器一个。</p>`;
+                } else if(type === 'tip2') {
+                    content.innerHTML = `<h4 class='text-blue-500 font-bold mb-2'>诊所/药店逻辑：</h4><p>初三家长焦虑时容易失眠、头疼。药店老板往往是他们的情绪垃圾桶。给老板一张‘升学减压卡’放在收银台。老板一句话：‘别愁了，加这个老师聊聊，他懂怎么选学校’。</p>`;
+                } else {
+                    content.innerHTML = `<h4 class='text-green-500 font-bold mb-2'>超市拆包器方案：</h4><p>定制带有磁吸功能的拆包小刀。贴在门口冷柜上免费取用。上面印：‘2026招生-新宿舍带你看。’家长拿回家贴在冰箱上，你的广告就在他家厨房住下了。</p>`;
+                }
+                content.style.opacity = '1';
+            }, 200);
+        }
+
+        function switchTab(type) {
+            const content = document.getElementById('tab-content');
+            const btnDy = document.getElementById('btn-dy');
+            const btnXhs = document.getElementById('btn-xhs');
+
+            if (type === 'dy') {
+                btnDy.classList.add('bg-blue-600', 'text-white');
+                btnDy.classList.remove('opacity-50');
+                btnXhs.classList.remove('bg-blue-600', 'text-white');
+                btnXhs.classList.add('opacity-50');
+                
+                content.innerHTML = `
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="video" class="mr-2 w-4 h-4"></i> 1. 宿舍开箱脚本 (向往)</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed">第一视角。进门扫卡 -> 镜头平滑掠过干净桌面 -> 冲进独立卫浴看热水器 -> 镜头转到全屋空调。
+                        <b>口播：</b>“谁家好人中职宿舍长这样？上床下桌、独立卫浴、人脸识别。给孩子一个温暖的家。私我，发你地址。”</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="user-minus" class="mr-2 w-4 h-4"></i> 2. 耿直劝退 (建立信任)</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed">老师坐在实训室大声说。<b>口播：</b>“考了500分的求你别找我！我们只招想学真技术、想拿高薪就业的孩子。混日子的也请绕道。想学真的，点我头像。”</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="chef-hat" class="mr-2 w-4 h-4"></i> 3. 食堂突击 (管理透明)</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed">快节奏剪辑食堂红烧肉、鸡腿。<b>口播：</b>“10块钱，两荤两素米饭管够。孩子吃得好，家长才放心。你看这成色，这不比外卖香？”</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="clock" class="mr-2 w-4 h-4"></i> 4. 凌晨三点心声 (共情)</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed">老师在台灯下回微信。<b>口播：</b>“刚回完第100个家长的微信。选择决定未来，如果您也为孩子择校焦虑，私我聊聊。”</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="graduation-cap" class="mr-2 w-4 h-4"></i> 5. 毕业喜报直击 (结果)</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed">展示一叠名企入职合同。<b>口播：</b>“不画饼，只发饭碗！底薪6k包吃住，入职名企。评论区扣‘名单’发你。”</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="user-check" class="mr-2 w-4 h-4"></i> 6. 师生真实互动 (氛围)</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed">拍老师手把手教孩子焊接火花。<b>文案：</b>“有一种教育叫匠心相传。在这里，每个孩子都能重拾自信。”</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="alert-triangle" class="mr-2 w-4 h-4"></i> 7. 行业内幕揭露 (权威)</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed"><b>口播：</b>“选学校别只看操场大不大，要看实训室设备是不是最新的。今天我教你三个绝招识破虚假招生...”</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="map-pin" class="mr-2 w-4 h-4"></i> 8. 云探校直播切片</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed">直播录屏：实时回答家长关于学费、管理的提问。<b>文案：</b>“真诚招生，实时答疑。”</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="heart-handshake" class="mr-2 w-4 h-4"></i> 9. 老生家长访谈</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed">采访已入学家长。<b>口播：</b>“当初孩子考不上高中我也愁死，现在看他变得这么懂事，选对了！”</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-blue-500/30 transition">
+                        <h5 class="text-blue-400 font-bold mb-3 flex items-center"><i data-lucide="award" class="mr-2 w-4 h-4"></i> 10. 技能大赛卡点</h5>
+                        <p class="text-xs opacity-70 italic leading-relaxed">燃脂剪辑学生拿奖杯。<b>文案：</b>“职业教育一样有光。只要努力，你也是冠军。”</p>
+                    </div>
+                `;
+            } else {
+                btnXhs.classList.add('bg-blue-600', 'text-white');
+                btnXhs.classList.remove('opacity-50');
+                btnDy.classList.remove('bg-blue-600', 'text-white');
+                btnDy.classList.add('opacity-50');
+                
+                content.innerHTML = `
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-orange-500/30 transition">
+                        <h5 class="text-orange-400 font-bold mb-2">标题：救命！中考择校这4个坑千万别踩❌</h5>
+                        <p class="text-xs opacity-60 leading-relaxed"><b>正文：</b>1.只看校门不看实训。2.听吹嘘不看就业。3.贪学费便宜。4.选过时专业。我整理了《2026避雷清单》，扣‘领’发你。</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-orange-500/30 transition">
+                        <h5 class="text-orange-400 font-bold mb-2">标题：建议收藏！中职考察必问的10个问题✅</h5>
+                        <p class="text-xs opacity-60 leading-relaxed"><b>正文：</b>宿舍几人间？空调几度开？实操占比多少？把专业度拉满，引导家长私信咨询。</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-orange-500/30 transition">
+                        <h5 class="text-orange-400 font-bold mb-2">标题：谁说读中职就没出息？我偏不信🔥</h5>
+                        <p class="text-xs opacity-60 leading-relaxed"><b>正文：</b>分享一个200分逆袭进入大厂的真实案例。关键词：换个赛道。#逆袭 #职业教育</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-orange-500/30 transition">
+                        <h5 class="text-orange-400 font-bold mb-2">标题：2026热门专业怎么选？看这篇说透了📊</h5>
+                        <p class="text-xs opacity-60 leading-relaxed"><b>正文：</b>机器人vs数媒vs护理。从薪资、难度、职业寿命三维度测评。建议收藏。</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-orange-500/30 transition">
+                        <h5 class="text-orange-400 font-bold mb-2">标题：致焦虑家长：孩子考不上高中，天没塌💌</h5>
+                        <p class="text-xs opacity-60 leading-relaxed"><b>正文：</b>走心文学。分享如何正确看待职普分流。承认难受，提供方案。#中考加油</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-orange-500/30 transition">
+                        <h5 class="text-orange-400 font-bold mb-2">标题：中专生活Vlog：原来学习可以这么快乐✨</h5>
+                        <p class="text-xs opacity-60 leading-relaxed"><b>正文：</b>晒美美的校园照。打破“脏乱差”刻板印象。#高颜值校园</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-orange-500/30 transition">
+                        <h5 class="text-orange-400 font-bold mb-2">标题：中职vs普高，真实落差有多大？🧐</h5>
+                        <p class="text-xs opacity-60 leading-relaxed"><b>正文：</b>对比图表。强调中职的升学政策优势。#对口升学</p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-white/5 hover:border-orange-500/30 transition">
+                        <h5 class="text-orange-400 font-bold mb-2">标题：2026届新生必领！开学大礼包🎁</h5>
+                        <p class="text-xs opacity-60 leading-relaxed"><b>正文：</b>私信扣‘1’，免费领择校指南和新生礼品。#福利</p>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
